@@ -1,0 +1,127 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Nota: se usan String en vez de enum (SQLite no los soporta bien); los
+// valores válidos de cada campo están documentados en el comentario.
+
+model Machine {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  brand       String   @default("LiuGong")
+  model       String
+  category    String // RETROPALA | MOTONIVELADORA | PALA_CARGADORA | EXCAVADORA | COMPACTADOR | TOPADORA | CAMION | OTRO
+  operation   String // VENTA | ALQUILER
+  condition   String   @default("NUEVA") // NUEVA | USADA
+  year        Int?
+  hours       Int? // horas de uso (maquinaria usada)
+  price       Float
+  currency    String   @default("USD")
+  status      String   @default("DISPONIBLE") // DISPONIBLE | RESERVADA | VENDIDA | ALQUILADA
+  description String
+  coverImage  String
+  images      String // JSON string array de URLs
+  panoramaUrl String?
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  leads  Lead[]
+  ventas MachineSale[]
+
+  @@index([operation, status])
+}
+
+model SparePart {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  category  String
+  stock     Int      @default(0)
+  price     Float
+  currency  String   @default("USD")
+  createdAt DateTime @default(now())
+
+  ventas PartSale[]
+}
+
+model Salesperson {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  leads       Lead[]
+  machineSales MachineSale[]
+  partSales    PartSale[]
+}
+
+model Lead {
+  id          String   @id @default(cuid())
+  name        String
+  phone       String
+  source      String   @default("Manual") // META_ADS | WHATSAPP | INSTAGRAM | REFERIDO | MANUAL
+  campaign    String? // nombre de campaña, solo si source = META_ADS
+  stage       String   @default("NUEVO") // NUEVO | CONTACTADO | COTIZANDO | NEGOCIACION | GANADO | PERDIDO
+  estValue    Float?
+  notes       String?
+  machineId   String?
+  machine     Machine? @relation(fields: [machineId], references: [id])
+  vendorId    String?
+  vendor      Salesperson? @relation(fields: [vendorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model MachineSale {
+  id         String   @id @default(cuid())
+  machineId  String
+  machine    Machine  @relation(fields: [machineId], references: [id])
+  vendorId   String?
+  vendor     Salesperson? @relation(fields: [vendorId], references: [id])
+  buyerName  String
+  amount     Float
+  currency   String   @default("USD")
+  date       DateTime @default(now())
+
+  @@index([date])
+}
+
+model PartSale {
+  id         String    @id @default(cuid())
+  partId     String
+  part       SparePart @relation(fields: [partId], references: [id])
+  vendorId   String?
+  vendor     Salesperson? @relation(fields: [vendorId], references: [id])
+  quantity   Int
+  unitPrice  Float
+  total      Float
+  customerName String
+  date       DateTime  @default(now())
+
+  @@index([date])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  kind      String // LEAD_META_ADS | VENTA_MAQUINA | VENTA_REPUESTO
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AdminUser {
+  id           String @id @default(cuid())
+  email        String @unique
+  passwordHash String
+  name         String
+}

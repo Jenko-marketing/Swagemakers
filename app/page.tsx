@@ -1,69 +1,122 @@
-import Image from "next/image";
+import Link from "next/link";
+import { prisma } from "@/lib/db";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { MachineCard } from "@/components/MachineCard";
+import { waLink, SITE_TAGLINE } from "@/lib/site";
+import { MessageCircle, Truck, Wrench, Sparkles } from "lucide-react";
 
-export default function Home() {
+export default async function HomePage() {
+  const [featured, latest] = await Promise.all([
+    prisma.machine.findMany({
+      where: { featured: true, status: { in: ["DISPONIBLE", "RESERVADA"] } },
+      take: 3,
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.machine.findMany({
+      where: { status: { in: ["DISPONIBLE", "RESERVADA"] } },
+      take: 6,
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const shown = featured.length ? featured : latest.slice(0, 3);
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
+    <>
+      <SiteHeader />
+      <main className="flex-1">
+        <section className="relative overflow-hidden bg-brand-navy text-white">
+          <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
+            <p className="text-sm font-semibold uppercase tracking-widest text-brand-orange">
+              {SITE_TAGLINE}
+            </p>
+            <h1 className="mt-3 max-w-2xl text-4xl font-bold leading-tight sm:text-5xl">
+              Máquinas viales LiuGong para tu obra, en venta o alquiler
+            </h1>
+            <p className="mt-4 max-w-xl text-brand-gray-200">
+              Recorré cada máquina en 360° antes de ir al playón, y consultanos al
+              instante por WhatsApp. Repuestos y service en Resistencia, Chaco.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link
+                href="/maquinas"
+                className="rounded-lg bg-brand-orange px-5 py-3 text-sm font-semibold text-white hover:bg-brand-orange-dark"
+              >
+                Ver máquinas
+              </Link>
+              <a
+                href={waLink("Hola! Quiero más información sobre sus máquinas.")}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center gap-2 rounded-lg border border-white/30 px-5 py-3 text-sm font-semibold hover:border-white"
+              >
+                <MessageCircle size={16} /> Consultar por WhatsApp
+              </a>
+            </div>
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+          <div className="flex items-end justify-between">
+            <h2 className="text-2xl font-bold text-brand-gray-900">Destacadas</h2>
+            <Link href="/maquinas" className="text-sm font-semibold text-brand-orange">
+              Ver todas →
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {shown.map((machine) => (
+              <MachineCard key={machine.id} machine={machine} />
+            ))}
+            {shown.length === 0 ? (
+              <p className="col-span-full text-brand-gray-500">
+                Todavía no hay máquinas cargadas.
+              </p>
+            ) : null}
+          </div>
+        </section>
+
+        <section className="border-t border-brand-gray-200 bg-brand-gray-50">
+          <div className="mx-auto grid max-w-6xl grid-cols-1 gap-8 px-4 py-14 sm:grid-cols-3 sm:px-6">
+            <Feature
+              icon={<Sparkles size={20} />}
+              title="Recorrido 360°"
+              text="Mirá cada máquina desde todos los ángulos antes de ir a verla al playón."
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+            <Feature
+              icon={<Truck size={20} />}
+              title="Venta y alquiler"
+              text="Retropalas, motoniveladoras, palas cargadoras y más, 0km y usadas."
+            />
+            <Feature
+              icon={<Wrench size={20} />}
+              title="Repuestos y service"
+              text="Stock de repuestos originales LiuGong y atención post-venta."
+            />
+          </div>
+        </section>
       </main>
+      <SiteFooter />
+    </>
+  );
+}
+
+function Feature({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div>
+      <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-orange-light text-brand-orange-dark">
+        {icon}
+      </span>
+      <h3 className="mt-3 font-semibold text-brand-gray-900">{title}</h3>
+      <p className="mt-1 text-sm text-brand-gray-500">{text}</p>
     </div>
   );
 }
