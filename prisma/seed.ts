@@ -45,10 +45,10 @@ async function main() {
   console.log("Creando máquinas...");
   const retropala0km = await prisma.machine.create({
     data: {
-      slug: "retropala-wz30-25-0km",
-      title: "Retropala LiuGong WZ30-25 0km",
+      slug: "retropala-liugong-766-0km",
+      title: "Retropala LiuGong 766 0km",
       brand: "LiuGong",
-      model: "WZ30-25",
+      model: "766",
       category: "RETROPALA",
       operation: "VENTA",
       condition: "NUEVA",
@@ -58,19 +58,19 @@ async function main() {
       status: "DISPONIBLE",
       featured: true,
       description:
-        "Retropala 0km, motor Cummins, cabina con aire acondicionado, tracción 4x4. Entrega inmediata con service incluido el primer año.",
-      coverImage: img("swage-retropala-1"),
-      images: JSON.stringify([img("swage-retropala-1"), img("swage-retropala-2"), img("swage-retropala-3")]),
+        "Motor Cummins original, transmisión y diferenciales Carraro. Potencia y versatilidad para múltiples trabajos, excelente capacidad de carga y excavación. Incluye garantía oficial, service postventa y repuestos originales. Financiación disponible en 18, 24 o 36 cuotas en pesos.",
+      coverImage: "/machines/retropala-766.jpg",
+      images: JSON.stringify(["/machines/retropala-766.jpg"]),
       panoramaUrl: PANORAMA_URL,
     },
   });
 
   const palaCargadora = await prisma.machine.create({
     data: {
-      slug: "pala-cargadora-clg856h-0km",
-      title: "Pala cargadora LiuGong CLG856H 0km",
+      slug: "pala-cargadora-liugong-835n-0km",
+      title: "Pala cargadora LiuGong 835N 0km",
       brand: "LiuGong",
-      model: "CLG856H",
+      model: "835N",
       category: "PALA_CARGADORA",
       operation: "VENTA",
       condition: "NUEVA",
@@ -80,9 +80,9 @@ async function main() {
       status: "DISPONIBLE",
       featured: true,
       description:
-        "Pala cargadora de 3 m³, motor Cummins de 178HP, transmisión ZF. Ideal para cantera y movimiento de áridos.",
-      coverImage: img("swage-pala-1"),
-      images: JSON.stringify([img("swage-pala-1"), img("swage-pala-2"), img("swage-pala-3")]),
+        "Preparada para rendir en los trabajos más exigentes. Ideal para mover grandes volúmenes con eficiencia: alto rendimiento, operación estable, pensada para construcción, canteras y logística.",
+      coverImage: "/machines/pala-835n.jpg",
+      images: JSON.stringify(["/machines/pala-835n.jpg"]),
       panoramaUrl: PANORAMA_URL,
     },
   });
